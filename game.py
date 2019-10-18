@@ -754,4 +754,6 @@ class Game:
                     self._agentCrash(agentIndex)
                     self.unmute()
                     return
+
+        time.sleep(20)
         self.display.finish()

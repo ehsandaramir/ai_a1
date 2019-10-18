@@ -38,9 +38,43 @@ def iddfs(problem):
     :param problem: instance of SearchProblem
     :return: list of actions
     """
+    s = Directions.SOUTH
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    current_state = problem.startState, s, 0
+    visited = set()
+    visited.add(current_state[0])
+    route = []
+
+    while not problem.isGoalState(current_state[0]):
+        non_visited = False
+        nxt = problem.getNextStates(current_state[0])
+        for item in nxt:
+            if item[0] not in visited:
+                route.append(item)
+                visited.add(item[0])
+                current_state = item
+                non_visited = True
+                break
+
+        if not non_visited:
+            # when we should go back:
+            if len(route) == 0:
+                return [Directions.STOP]
+            current_state = route.pop()
+
+            non_visited = False
+            nxt = problem.getNextStates(current_state[0])
+            for item in nxt:
+                if item[0] not in visited:
+                    non_visited = True
+                    break
+
+            if non_visited:
+                route.append(current_state)
+
+    route = list(map(lambda item: item[1], route))
+
+    return route
 
 
 def hide_and_seek(problem):
