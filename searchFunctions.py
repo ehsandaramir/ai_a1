@@ -77,13 +77,80 @@ def iddfs(problem):
     return route
 
 
+def find_nearest_corner(problem, start_state, forbidden, to_target=False):
+    current_state = start_state
+    queue = [start_state]
+    visited = set()
+
+    parents = {current_state[0]: current_state}
+
+    while queue:
+        current_state = queue.pop(0)
+        visited.add(current_state[0])
+        nxt = problem.getNextStates(current_state[0])
+
+        if to_target:
+            if problem.isGoalState(current_state[0]):
+                route = [current_state[1]]
+                current_parent = parents[current_state[0]]
+                while parents[current_parent[0]][0] != current_parent[0]:
+                    route.append(current_parent[1])
+                    current_parent = parents[current_parent[0]]
+
+                route.reverse()
+                return route, current_state
+        elif len(nxt) == 2 and current_state[0] not in forbidden:
+            c1 = nxt[0][0]
+            c2 = nxt[1][0]
+
+            if c1[0] != c2[0] and c1[1] != c2[1]:
+                route = [current_state[1]]
+                current_parent = parents[current_state[0]]
+                while parents[current_parent[0]][0] != current_parent[0]:
+                    route.append(current_parent[1])
+                    current_parent = parents[current_parent[0]]
+
+                route.reverse()
+                return route, current_state
+
+        for item in nxt:
+            if item[0] not in visited:
+                queue.append(item)
+                parents[item[0]] = current_state
+
+
 def hide_and_seek(problem):
     """
     Q2: Hide and seek game !!!!!
     """
+    s = Directions.SOUTH
+    current_state = problem.startState, s, 0
+    forbidden = set()
+    forbidden.add(current_state[0])
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    route = []
+
+    while True:
+        results = find_nearest_corner(problem, current_state, forbidden)
+        if results is None:
+            break
+        else:
+            route_curr, current_state = results[0], results[1]
+            forbidden.add(current_state[0])
+            route += route_curr
+            print route
+
+    if not problem.isGoalState(current_state[0]):
+        forbidden.clear()
+        results = find_nearest_corner(problem, current_state, forbidden, True)
+        if results is None:
+            route += [Directions.STOP]
+        else:
+            route_curr, current_state = results[0], results[1]
+            route += route_curr
+            print route
+
+    return route
 
 
 def ucs(problem):
