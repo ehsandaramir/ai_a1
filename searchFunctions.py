@@ -19,9 +19,7 @@ def bfs(problem):
     """
     Q3: BFS
     """
-
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pass
 
 
 def iddfs(problem):

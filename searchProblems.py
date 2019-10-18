@@ -172,32 +172,40 @@ class LineByLineProblem (SearchProblem):
         self.foods = startingGameState.getFood().deepCopy()
         self._expanded = 0  # DO NOT CHANGE; Number of search nodes expanded
 
-        """
-        To get started, you might want to try some of these simple commands to
-        understand the search problem that is being passed in:
+        self.food = self.getNextFood(self.startingPosition)
+        self.eaten = set()
+        self.eaten.add(self.startingPosition)
 
-        print self.goal
-        print self.foods
-        print self.walls
-        """
+    def getNextFood(self, pos):
+        x = pos[0]
+        y = pos[1]
 
-        # Please add any code here which you would like to use
-        # in initializing the problem, it's okey if you don't have any additional code
-        "*** YOUR CODE HERE ***"
+        while x > 0:
+            for i in range(1, y):
+                if self.foods.data[x][y-i]:
+                    return x, y - i
+            y = self.foods.height
+            x -= 1
+
+    def setFoodEaten(self, pos):
+        self.eaten.add(pos)
+        self.foods.data[pos[0]][pos[1]] = False
+        self.food = self.getNextFood(pos)
+
+    def isNextFood(self, pos):
+        return pos == self.food
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state == self.goal
 
     def getNextStates(self, state):
         """
@@ -210,15 +218,35 @@ class LineByLineProblem (SearchProblem):
             is the incremental cost of expanding to that successor
         """
 
-        next_states = []
-        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            # Add a next state to the next_states list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall, or hit a food:
+        successors = []
+        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST]:
+            x, y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = 0
+                successors.append((nextState, action, cost))
 
-            "*** YOUR CODE HERE ***"
+        for action in [Directions.WEST]:
+            x, y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty] and self.canGoWest(state):
+                nextState = (nextx, nexty)
+                cost = 0
+                successors.append((nextState, action, cost))
 
         self._expanded += 1  # DO NOT CHANGE
-        return next_states
+        return successors
+
+    def canGoWest(self, pos):
+        x = self.foods.width - 1
+        while x >= pos[0]:
+            if any(self.foods.data):
+                return False
+            x -= 1
+        return True
 
     def getCostOfActions(self, actions):
         """
