@@ -176,6 +176,14 @@ class LineByLineProblem (SearchProblem):
         self.eaten = set()
         self.eaten.add(self.startingPosition)
 
+    def totalTargetCount(self):
+        counter = 1
+        for y in range(self.foods.height):
+            for x in range(self.foods.width):
+                if self.foods.data[x][y]:
+                    counter += 1
+        return counter
+
     def getNextFood(self, pos):
         x = pos[0]
         y = pos[1]
@@ -186,6 +194,8 @@ class LineByLineProblem (SearchProblem):
                     return x, y - i
             y = self.foods.height
             x -= 1
+
+        return self.goal
 
     def setFoodEaten(self, pos):
         self.eaten.add(pos)
@@ -217,16 +227,7 @@ class LineByLineProblem (SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-
         successors = []
-        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST]:
-            x, y = state
-            dx, dy = Actions.directionToVector(action)
-            nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
-                nextState = (nextx, nexty)
-                cost = 0
-                successors.append((nextState, action, cost))
 
         for action in [Directions.WEST]:
             x, y = state
@@ -237,14 +238,24 @@ class LineByLineProblem (SearchProblem):
                 cost = 0
                 successors.append((nextState, action, cost))
 
+        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST]:
+            x, y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = 0
+                successors.append((nextState, action, cost))
+
         self._expanded += 1  # DO NOT CHANGE
         return successors
 
     def canGoWest(self, pos):
         x = self.foods.width - 1
         while x >= pos[0]:
-            if any(self.foods.data):
-                return False
+            for row in self.foods.data:
+                if any(row[pos[0]:]):
+                    return False
             x -= 1
         return True
 

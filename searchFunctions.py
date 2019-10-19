@@ -15,11 +15,48 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
+def bfs_internal(problem, current_state):
+    queue = [current_state]
+    visited = set()
+    visited.add(current_state[0])
+    parents = {current_state[0]: current_state}
+
+    while queue:
+        current_state = queue.pop(0)
+
+        nxt = problem.getNextStates(current_state[0])
+        for item in nxt:
+            if item[0] not in visited:
+                queue.append(item)
+                parents[item[0]] = current_state
+                visited.add(item[0])
+
+        if problem.isNextFood(current_state[0]):
+            problem.setFoodEaten(current_state[0])
+
+            route = []
+            current_parent = current_state
+            while parents[current_parent[0]][0] != current_parent[0]:
+                route.insert(0, current_parent[1])
+                current_parent = parents[current_parent[0]]
+
+            return route, current_state
+
+    return [Directions.STOP], current_state
+
+
 def bfs(problem):
     """
     Q3: BFS
     """
-    pass
+    current_state = problem.startingPosition, Directions.SOUTH, 0
+    route = []
+
+    for i in range(problem.totalTargetCount()):
+        route_new, current_state = bfs_internal(problem, current_state)
+        route += route_new
+
+    return route
 
 
 def iddfs(problem):
